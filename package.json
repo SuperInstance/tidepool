@@ -1,0 +1,10 @@
+{
+  "name": "tide-pool",
+  "private": true,
+  "type": "module",
+  "description": "The fleet's vector context ocean: every agent distills, every agent recalls.",
+  "scripts": {
+    "test": "node tests/tidepool.smoke.mjs"
+  },
+  "license": "MIT"
+}

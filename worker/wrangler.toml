@@ -1,0 +1,19 @@
+name = "tide-pool"
+main = "index.js"
+compatibility_date = "2024-09-25"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "tide-pool-db"
+database_id = "00000000-0000-0000-0000-000000000000" # replace: wrangler d1 create tide-pool-db
+
+[[vectorize]]
+binding = "TIDEPOOL_NATIVE"
+index_name = "tidepool-native" # 16 dims, cosine
+
+[[vectorize]]
+binding = "TIDEPOOL_SEMANTIC"
+index_name = "tidepool-semantic" # 768 dims, cosine
+
+[ai]
+binding = "AI"
