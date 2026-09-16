@@ -1,6 +1,7 @@
-# tide-pool
+# tidepool
 
-**The fleet's vector context ocean.** Every agent's context window is a tide
+**The fleet's vector context ocean.** (Repo `tide-pool` was already taken by
+the Ship Protocol BBS — this is one word, same water.) Every agent's context window is a tide
 pool — it drains each session. This is the ocean behind it: distilled
 artifacts (lessons, audits, designs, playtests, tiles) written by any agent,
 recalled by any agent, embedded in Cloudflare Vectorize, journaled in D1.
@@ -43,12 +44,12 @@ Degrade honest, never 502 — unbound bindings report themselves in
 ```bash
 npm i -g wrangler
 wrangler login
-wrangler d1 create tide-pool-db            # paste database_id into worker/wrangler.toml
+wrangler d1 create tidepool-db            # paste database_id into worker/wrangler.toml
 wrangler vectorize create tidepool-native --dimensions=16 --metric=cosine
 wrangler vectorize create tidepool-semantic --dimensions=768 --metric=cosine
-wrangler d1 execute tide-pool-db --remote --file=worker/schema.sql
+wrangler d1 execute tidepool-db --remote --file=worker/schema.sql
 cd worker && wrangler deploy
-curl https://tide-pool.<subdomain>.workers.dev/health
+curl https://tidepool.<subdomain>.workers.dev/health
 ```
 
 ## Test

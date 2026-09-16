@@ -1,11 +1,11 @@
-name = "tide-pool"
+name = "tidepool"
 main = "index.js"
 compatibility_date = "2024-09-25"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "tide-pool-db"
-database_id = "00000000-0000-0000-0000-000000000000" # replace: wrangler d1 create tide-pool-db
+database_name = "tidepool-db"
+database_id = "00000000-0000-0000-0000-000000000000" # replace: wrangler d1 create tidepool-db
 
 [[vectorize]]
 binding = "TIDEPOOL_NATIVE"
