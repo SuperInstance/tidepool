@@ -6,7 +6,7 @@ state: active
 family: applications
 vessel: CCC
 born_from: []
-feeds: [quilt-studio]
+feeds: [quilt-studio, duke-lab]
 owed_by: [hermit]
 canonical_docs: [README.md, src/index.ts]
 ledger: git-log
