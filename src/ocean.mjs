@@ -15,6 +15,7 @@
 import { appendFile, readFile } from "node:fs/promises";
 
 const SECTION_RE = /^## thread:([^\n]+)$/gm;
+const BREED_SECTION_RE = /^## breed:([^\n]+)$/gm;
 
 const tokenize = (text) =>
   String(text ?? "")
@@ -34,6 +35,8 @@ export class TidepoolOcean {
     this.markdown = "# Tidepool Ocean\n\n<!-- append-only: never modify, never delete. every section carries rememberedAt. -->\n";
     /** @type {Map<string, Object>} threadId -> recall entry (latest memory wins) */
     this.index = new Map();
+    /** @type {Map<string, Object>} breed thread_id -> ℚ¹⁶ trajectory entry */
+    this.breedIndex = new Map();
     this._actionCount = 0;
   }
 
@@ -78,6 +81,42 @@ export class TidepoolOcean {
       `lastMessage: ${thread.lastMessageId}\n\n`;
     await this._append(section);
     this.index.set(thread.id, entry);
+    return { section, entry };
+  }
+
+  /**
+   * Remember one duke-lab ℚ¹⁶ breed trajectory (the breed.mjs extension).
+   * Appends a `## breed:<thread_id>` section and upserts the breed recall
+   * index. Same oaths: append-only, timestamped, no edit/delete API.
+   *
+   * @param {import("./breed.mjs").BreedTrajectory} row
+   */
+  async rememberBreed(row) {
+    const ts = this.now();
+    const entry = {
+      thread_id: row.thread_id,
+      kind: "breed-trajectory",
+      artist: row.artist,
+      persona: row.persona,
+      seed: row.seed,
+      verdict: row.verdict,
+      rounds: row.rounds,
+      trace: row.trace,
+      final_params: row.final_params,
+      rememberedAt: ts,
+    };
+    const traceJson = JSON.stringify(row.trace);
+    const section =
+      `## breed:${row.thread_id}\n` +
+      `rememberedAt: ${ts}\n` +
+      `artist: ${row.artist} persona: ${row.persona}\n` +
+      `seed: ${row.seed}\n` +
+      `verdict: ${row.verdict.status} round=${row.verdict.round} sigma=${row.verdict.sigma}\n` +
+      `rounds: ${row.rounds}\n` +
+      `trace: ${traceJson}\n` +
+      `finalParams: ${JSON.stringify(row.final_params)}\n\n`;
+    await this._append(section);
+    this.breedIndex.set(row.thread_id, entry);
     return { section, entry };
   }
 
