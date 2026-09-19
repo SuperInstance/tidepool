@@ -61,3 +61,15 @@ npm test   # 18 checks, mocked D1/Vectorize/AI, deterministic embeddings
 ## License
 
 MIT. The pool belongs to the fleet. The fleet belongs to the range.
+
+## JEV gate (four-model psyche)
+
+The recall path can carry a schema-bounded conscience (see
+`SuperInstance/AI-Writings`, `/invitation/`). Set `TIDEPOOL_JEV=on` (or
+`1`/`mock`/`http`) to annotate every scored recall row with a typed JEV
+decision — `{ decision: 'surface'|'suppress'|'abstain', confidence, reasons }` —
+certified by σ = √(c_emb · c_jev), the agreement mass across the two local
+witnesses. Pairings below `TIDEPOOL_JEV_FLOOR` (default 0.5) refuse as a
+typed `abstain`. With `JEV_API_URL` set the gate calls a real JEV endpoint;
+otherwise it runs a deterministic mock. Off by default: responses are
+bit-identical to the ungated pool.
