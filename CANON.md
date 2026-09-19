@@ -6,7 +6,7 @@ state: active
 family: infrastructure
 vessel: CCC
 born_from: [quilt]
-feeds: [hermit, duke-lab]
+feeds: [hermit, duke-lab, quilt-studio]
 owed_by: [quilt, hermit, duke-lab]
 canonical_docs: [README.md]
 ledger: quilt-wal
