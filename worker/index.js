@@ -3,6 +3,32 @@
 // Discipline carried over from duke-lab: degrade honest (never 502),
 // 45/min/IP sliding window, fnv1a(ip) fingerprints, no secrets in the pool.
 
+import { createJevClient, gateRecall } from '../src/jev.mjs';
+
+// The superego of the recall path. Opt-in: TIDEPOOL_JEV=1|on|mock|http.
+// Without it the pool recalls exactly as before — zero behavior change.
+function jevEnabled(env) {
+  const v = env.TIDEPOOL_JEV;
+  return v === '1' || v === 'on' || v === 'mock' || v === 'http';
+}
+
+// Annotate scored recall rows with a typed JEV decision and certify the
+// recall pairing with sigma (AGREE-MARK over emb + jev witnesses).
+// Rows must carry a numeric `score` (cosine similarity) to be gated.
+async function jevGate(rows, { env, query }) {
+  if (!jevEnabled(env)) return {};
+  const client = createJevClient({ apiUrl: env.JEV_API_URL || null });
+  const floor = Math.min(1, Math.max(0, Number(env.TIDEPOOL_JEV_FLOOR ?? 0.5)));
+  const counts = { surfaced: 0, suppressed: 0, abstained: 0 };
+  for (const r of rows) {
+    const jev = await client.scoreRecall({ candidate: r, query });
+    const g = gateRecall({ jev, similarity: typeof r.score === 'number' ? r.score : 0, sigmaFloor: floor });
+    r.jev = g;
+    counts[g.decision === 'surface' ? 'surfaced' : g.decision === 'suppress' ? 'suppressed' : 'abstained']++;
+  }
+  return { jev: { gated: true, mode: client.mode, floor, ...counts } };
+}
+
 const WINDOW_MS = 60_000;
 const LIMIT = 45;
 
@@ -135,7 +161,7 @@ export default {
           rows = applyFilters(rows, u.searchParams).slice(0, limit);
           rows = rows.map(r => ({ ...r, score: scoreById.get(r.id) ?? null }));
           rows.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
-          return json({ ok: true, mode: 'semantic', count: rows.length, results: rows });
+          return json({ ok: true, mode: 'semantic', count: rows.length, results: rows, ...(await jevGate(rows, { env, query: q })) });
         }
         // honest degrade: keyword search over title/body
         const needle = `%${q.slice(0, 80)}%`;
@@ -164,7 +190,7 @@ export default {
         let rows = (await rowsByIds(env, ids)).slice(0, limit);
         rows = rows.map(r => ({ ...r, score: scoreById.get(r.id) ?? null }));
         rows.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
-        return json({ ok: true, mode: 'native', count: rows.length, results: rows });
+        return json({ ok: true, mode: 'native', count: rows.length, results: rows, ...(await jevGate(rows, { env, query: `vec:${vecParam.slice(0, 24)}` })) });
       }
       if (!id) return json({ ok: false, error: 'id_or_vec_required' }, 400);
       const row = await env.DB.prepare('SELECT * FROM artifacts WHERE id = ?').bind(id).first();
@@ -184,7 +210,7 @@ export default {
       let rows = (await rowsByIds(env, (qr.matches || []).map(m => m.id))).filter(r => r.id !== id);
       rows = rows.slice(0, limit).map(r => ({ ...r, score: scoreById.get(r.id) ?? null }));
       rows.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
-      return json({ ok: true, mode: 'semantic', count: rows.length, results: rows });
+      return json({ ok: true, mode: 'semantic', count: rows.length, results: rows, ...(await jevGate(rows, { env, query: row.title })) });
     }
 
     if (p === '/api/ledger') {
