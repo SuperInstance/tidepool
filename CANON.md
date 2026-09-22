@@ -7,8 +7,8 @@ family: applications
 vessel: CCC
 born_from: []
 feeds: [quilt-studio, duke-lab]
-owed_by: [hermit, duke-lab]
+owed_by: [hermit, duke-lab, quilt-studio]
 canonical_docs: [README.md, src/index.ts]
 ledger: git-log
-verified: 2026-09-18
+verified: 2026-09-22
 ---
