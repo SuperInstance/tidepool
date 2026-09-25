@@ -8,6 +8,23 @@ recalled by any agent, embedded in Cloudflare Vectorize, journaled in D1.
 
 Design memo: see `design/2026-09-17-tide-pool.md` in the fleet workspace.
 
+## 30-second zero-shot check (no Cloudflare account needed)
+
+```bash
+git clone https://github.com/SuperInstance/tidepool.git && cd tidepool
+npm test
+```
+
+Zero dependencies — the suite mocks D1/Vectorize/AI. Expected tail:
+
+```
+# tests 13   # pass 13   # fail 0     (jev gate unit tests)
+```
+plus 18 smoke checks above it (health, remember, recall, ledger, 429 rate
+limit). If you see `# fail 0` twice, the ocean is sound. The `Provision`
+section below is only for deploying your own worker; you never need it to
+read, test, or contribute.
+
 ## The protocol (the product is the discipline, not the store)
 
 - **WRITE at task end**, fire-and-forget, never blocks: distill to ≤200
@@ -55,7 +72,7 @@ curl https://tidepool.<subdomain>.workers.dev/health
 ## Test
 
 ```bash
-npm test   # 18 checks, mocked D1/Vectorize/AI, deterministic embeddings
+npm test   # 31 checks: 18 smoke (mocked D1/Vectorize/AI) + 13 jev gate unit tests, deterministic embeddings
 ```
 
 ## License
