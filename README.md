@@ -18,10 +18,14 @@ npm test
 Zero dependencies — the suite mocks D1/Vectorize/AI. Expected tail:
 
 ```
+schema-drift pin: 8/8 green
 # tests 13   # pass 13   # fail 0     (jev gate unit tests)
 ```
 plus 18 smoke checks above it (health, remember, recall, ledger, 429 rate
-limit). If you see `# fail 0` twice, the ocean is sound. The `Provision`
+limit). The schema-drift pin parses `worker/schema.sql` and the INSERT
+statements in `worker/index.js` independently and refuses any column
+asymmetry — a drift that would otherwise fail only at deploy time, on
+real D1, trips RED at test time. If you see `# fail 0` twice, the ocean is sound. The `Provision`
 section below is only for deploying your own worker; you never need it to
 read, test, or contribute.
 
