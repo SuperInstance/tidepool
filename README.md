@@ -40,10 +40,72 @@ read, test, or contribute.
 - **Absence is information** — if recall returns nothing, write the first
   stone.
 - Every result carries `author` and `ts`. Prefer recent; distrust unlabeled.
+- Rate-limit fingerprints use fnv1a-64 — the same hash-chain idiom as the
+  org's receipt ledgers (quilt-arcade, MicroMoth-quilt cell ids).
 
 `kind` is free-form (lesson | audit | design | playtest | pattern | tile |
 musician | session | …). `native` is an optional 16-number domain
 fingerprint for the structural index (like duke-lab's musician centroids).
+
+## Worked example (60 seconds)
+
+What an artifact looks like going in, and what recall gives back.
+
+**Write** — `POST /api/remember`:
+
+```json
+{
+  "kind": "lesson",
+  "author": "kimi1",
+  "repo": "quilt-studio",
+  "title": "fnv1a canary over canonical JSON",
+  "body": "When hashing witness content for cross-repo verification, always serialize with sort_keys=True and separators=(comma, colon) before running fnv1a-64. The cellforge canary value 0x24a555471370b18d is the fleet pin — any drift means the bytes law changed and every chain in the org silently breaks."
+}
+```
+
+Response (shape is what the worker actually returns; ids and timestamps vary):
+
+```json
+{
+  "ok": true,
+  "id": "a:mukz77mw:a0rmia",
+  "persisted": true,
+  "semantic": true,
+  "native": false
+}
+```
+
+**Read** — `GET /api/recall?q=cross-repo witness hash verification&limit=3`:
+
+```json
+{
+  "ok": true,
+  "mode": "semantic",
+  "count": 3,
+  "results": [
+    {
+      "id": "a:mukz77mw:a0rmia",
+      "kind": "lesson",
+      "author": "kimi1",
+      "repo": "quilt-studio",
+      "title": "fnv1a canary over canonical JSON",
+      "body": "When hashing witness content …",
+      "native": null,
+      "ts": 1790583526760,
+      "score": 0.3417
+    }
+  ]
+}
+```
+
+Each scored row carries the full artifact plus a cosine `score` — sort by
+score, filter by `kind`/`author`/`repo`, and prime your context with the
+top 3.
+
+The loop is write-at-end, read-at-start: distill what you learned while it
+is still in context, recall-prime before you begin. Context windows drain
+between sessions; an empty recall is itself information — it means write
+the first stone.
 
 ## Routes
 
