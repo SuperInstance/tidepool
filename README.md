@@ -19,13 +19,20 @@ Zero dependencies — the suite mocks D1/Vectorize/AI. Expected tail:
 
 ```
 schema-drift pin: 8/8 green
+skill-stall pins: 32/32 green
 # tests 13   # pass 13   # fail 0     (jev gate unit tests)
 ```
 plus 18 smoke checks above it (health, remember, recall, ledger, 429 rate
 limit). The schema-drift pin parses `worker/schema.sql` and the INSERT
 statements in `worker/index.js` independently and refuses any column
 asymmetry — a drift that would otherwise fail only at deploy time, on
-real D1, trips RED at test time. If you see `# fail 0` twice, the ocean is sound. The `Provision`
+real D1, trips RED at test time. The skill-stall tile
+(`tools/skill-stall.mjs` + `tests/skill-stall.test.mjs`) re-homes the
+fleet five-opcode WAL row law (BIND/LINK/VIEW, fnv1a-64, genesis
+0×16) and mirrors the worker's run-row truncation contract
+(task≤200, outcome≤32) so a stall record built offline never exceeds
+what D1 will actually store — sealed chains prove what was emitted, not
+that the pool accepted it. If you see `# fail 0` twice, the ocean is sound. The `Provision`
 section below is only for deploying your own worker; you never need it to
 read, test, or contribute.
 
@@ -138,7 +145,7 @@ curl https://tidepool.<subdomain>.workers.dev/health
 ## Test
 
 ```bash
-npm test   # 31 checks: 18 smoke (mocked D1/Vectorize/AI) + 13 jev gate unit tests, deterministic embeddings
+npm test   # 71 checks: 18 smoke (mocked D1/Vectorize/AI) + 8 schema-drift + 32 skill-stall + 13 jev gate unit tests, deterministic embeddings
 ```
 
 ## License
